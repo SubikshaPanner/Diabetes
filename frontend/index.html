@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>💙 Diabetes Risk Prediction</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #0066cc;
+      --primary-dark: #0052a3;
+      --primary-light: #e6f2ff;
+      --accent: #00d084;
+      --danger: #ff4757;
+      --warning: #ffa502;
+      --success: #2ed573;
+      --neutral-50: #f8f9fa;
+      --neutral-100: #e9ecef;
+      --neutral-200: #dee2e6;
+      --neutral-400: #adb5bd;
+      --neutral-600: #495057;
+      --neutral-800: #212529;
+      --text-primary: #1a1a1a;
+      --text-secondary: #636363;
+      --background: #ffffff;
+      --border: #e0e0e0;
+      --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
+      --radius: 12px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      color: var(--text-primary);
+    }
+
+    .container {
+      background: var(--background);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      max-width: 600px;
+      width: 100%;
+      overflow: hidden;
+      animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 40px 30px;
+      text-align: center;
+    }
+
+    .header-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+      font-weight: 500;
+    }
+
+    .content {
+      padding: 40px 30px;
+    }
+
+    .form-section {
+      margin-bottom: 32px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--primary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 3px;
+      height: 16px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      background: var(--neutral-50);
+      color: var(--text-primary);
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    input[type="number"]:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: white;
+      box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    input[type="number"]::placeholder {
+      color: var(--neutral-400);
+    }
+
+    .checkbox-group {
+      display: flex;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .checkbox-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--primary);
+    }
+
+    .checkbox-item label {
+      margin: 0;
+      font-weight: 500;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .input-group {
+      position: relative;
+    }
+
+    .input-hint {
+      font-size: 12px;
+      color: var(--neutral-400);
+      margin-top: 4px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      background: var(--primary);
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    button:hover {
+      background: var(--primary-dark);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      background: var(--neutral-400);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .result-container {
+      margin-top: 24px;
+      min-height: 0;
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: all 0.4s ease;
+    }
+
+    .result-container.show {
+      max-height: 300px;
+      opacity: 1;
+    }
+
+    .result-card {
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 16px;
+      border: 2px solid;
+      animation: resultAppear 0.4s ease;
+    }
+
+    @keyframes resultAppear {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .result-card.positive {
+      background: rgba(255, 71, 87, 0.1);
+      border-color: var(--danger);
+    }
+
+    .result-card.negative {
+      background: rgba(46, 213, 115, 0.1);
+      border-color: var(--success);
+    }
+
+    .result-card.error {
+      background: rgba(255, 165, 2, 0.1);
+      border-color: var(--warning);
+    }
+
+    .result-title {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .result-card.positive .result-title {
+      color: var(--danger);
+    }
+
+    .result-card.negative .result-title {
+      color: var(--success);
+    }
+
+    .result-card.error .result-title {
+      color: var(--warning);
+    }
+
+    .result-message {
+      font-size: 16px;
+      font-weight: 500;
+      margin: 8px 0;
+    }
+
+    .result-card.positive .result-message {
+      color: var(--danger);
+    }
+
+    .result-card.negative .result-message {
+      color: var(--success);
+    }
+
+    .result-card.error .result-message {
+      color: var(--warning);
+    }
+
+    .result-details {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--neutral-200);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 600px) {
+      .header {
+        padding: 30px 20px;
+      }
+
+      .header h1 {
+        font-size: 24px;
+      }
+
+      .header-icon {
+        font-size: 40px;
+      }
+
+      .content {
+        padding: 30px 20px;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .checkbox-group {
+        flex-direction: column;
+        gap: 12px;
+      }
+    }
+
+    .info-box {
+      background: var(--primary-light);
+      border-left: 4px solid var(--primary);
+      padding: 12px 16px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: var(--primary-dark);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .reset-btn {
+      background: var(--neutral-400);
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
+    .reset-btn:hover {
+      background: var(--neutral-600);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <span class="header-icon">💙</span>
+      <h1>Diabetes Risk Assessment</h1>
+      <p>Quick prediction based on your health metrics</p>
+    </div>
+
+    <div class="content">
+      <div class="info-box">
+        ℹ️ This tool provides a preliminary risk assessment. Please consult a healthcare professional for medical advice.
+      </div>
+
+      <form id="predictForm">
+        <!-- Personal Information Section -->
+        <div class="form-section">
+          <div class="section-title">Personal Information</div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="age">Age</label>
+              <input type="number" id="age" min="0" max="120" placeholder="Enter your age" required>
+              <div class="input-hint">Years</div>
+            </div>
+
+            <div class="form-group">
+              <label for="gender">Gender</label>
+              <select id="gender" required>
+                <option value="">Select gender</option>
+                <option value="Female">Female</option>
+                <option value="Male">Male</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Medical History Section -->
+        <div class="form-section">
+          <div class="section-title">Medical History</div>
+
+          <div class="checkbox-group">
+            <div class="checkbox-item">
+              <input type="checkbox" id="hypertension">
+              <label for="hypertension">Hypertension</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="heart_disease">
+              <label for="heart_disease">Heart Disease</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lifestyle Section -->
+        <div class="form-section">
+          <div class="section-title">Lifestyle</div>
+
+          <div class="form-group">
+            <label for="smoking_history">Smoking History</label>
+            <select id="smoking_history" required>
+              <option value="">Select smoking history</option>
+              <option value="No Info">No Info</option>
+              <option value="never">Never</option>
+              <option value="former">Former</option>
+              <option value="current">Current</option>
+              <option value="not current">Not Current</option>
+              <option value="ever">Ever</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Health Metrics Section -->
+        <div class="form-section">
+          <div class="section-title">Health Metrics</div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="bmi">BMI</label>
+              <input type="number" id="bmi" step="0.1" min="0" placeholder="e.g., 25.5" required>
+              <div class="input-hint">Body Mass Index</div>
+            </div>
+
+            <div class="form-group">
+              <label for="hba1c_level">HbA1c Level</label>
+              <input type="number" id="hba1c_level" step="0.1" min="0" placeholder="e.g., 5.5" required>
+              <div class="input-hint">Hemoglobin A1c (%)</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="blood_glucose_level">Blood Glucose Level</label>
+            <input type="number" id="blood_glucose_level" step="0.1" min="0" placeholder="e.g., 100" required>
+            <div class="input-hint">mg/dL (Fasting)</div>
+          </div>
+        </div>
+
+        <button type="submit">Analyze Risk</button>
+      </form>
+
+      <div class="result-container" id="resultContainer">
+        <div id="result"></div>
+      </div>
+
+      <button class="reset-btn" id="resetBtn" style="display: none;">Clear Results</button>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('predictForm');
+    const resultContainer = document.getElementById('resultContainer');
+    const resultDiv = document.getElementById('result');
+    const resetBtn = document.getElementById('resetBtn');
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const data = {
+        age: parseFloat(document.getElementById('age').value),
+        hypertension: document.getElementById('hypertension').checked ? 1 : 0,
+        heart_disease: document.getElementById('heart_disease').checked ? 1 : 0,
+        bmi: parseFloat(document.getElementById('bmi').value),
+        hba1c_level: parseFloat(document.getElementById('hba1c_level').value),
+        blood_glucose_level: parseFloat(document.getElementById('blood_glucose_level').value),
+        gender: document.getElementById('gender').value,
+        smoking_history: document.getElementById('smoking_history').value
+      };
+
+      // Validate inputs
+      if (!isValidInput(data)) {
+        showError('Please enter valid values for all fields.');
+        return;
+      }
+
+      const button = form.querySelector('button[type="submit"]');
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.innerHTML = '<span class="loading-spinner"></span>Analyzing...';
+
+      try {
+        const response = await fetch("http://127.0.0.1:5000/predict", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          displayResult(result.prediction);
+        } else {
+          showError(result.error || 'An error occurred during prediction.');
+        }
+      } catch (error) {
+        showError('Unable to connect to the server. Please check your connection and try again.');
+        console.error('Error:', error);
+      } finally {
+        button.disabled = false;
+        button.textContent = originalText;
+        resetBtn.style.display = 'block';
+      }
+    });
+
+    function isValidInput(data) {
+      return (
+        data.age > 0 && data.age <= 120 &&
+        data.bmi > 0 && data.bmi <= 100 &&
+        data.hba1c_level > 0 && data.hba1c_level <= 20 &&
+        data.blood_glucose_level > 0 && data.blood_glucose_level <= 500 &&
+        data.gender !== '' &&
+        data.smoking_history !== ''
+      );
+    }
+
+    function displayResult(prediction) {
+      const isPredicted = prediction === 'Positive';
+      const cardClass = isPredicted ? 'positive' : 'negative';
+      const icon = isPredicted ? '⚠️' : '✓';
+      const title = isPredicted ? 'Higher Risk Detected' : 'Lower Risk Detected';
+      const message = isPredicted 
+        ? 'The assessment suggests a higher risk of diabetes.'
+        : 'The assessment suggests a lower risk of diabetes.';
+
+      resultDiv.innerHTML = `
+        <div class="result-card ${cardClass}">
+          <div style="font-size: 24px; margin-bottom: 8px;">${icon}</div>
+          <div class="result-title">${title}</div>
+          <div class="result-message">${message}</div>
+          <div class="result-details">
+            <strong>Recommendation:</strong> ${isPredicted 
+              ? 'Please consult with a healthcare provider for a comprehensive evaluation and personalized health plan.' 
+              : 'Continue maintaining a healthy lifestyle with regular exercise and balanced nutrition. Regular check-ups are still recommended.'}
+          </div>
+        </div>
+      `;
+
+      resultContainer.classList.add('show');
+      resultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function showError(message) {
+      resultDiv.innerHTML = `
+        <div class="result-card error">
+          <div style="font-size: 24px; margin-bottom: 8px;">❌</div>
+          <div class="result-title">Error</div>
+          <div class="result-message">${message}</div>
+        </div>
+      `;
+      resultContainer.classList.add('show');
+    }
+
+    resetBtn.addEventListener('click', function() {
+      form.reset();
+      resultContainer.classList.remove('show');
+      resetBtn.style.display = 'none';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  </script>
+</body>
+</html>

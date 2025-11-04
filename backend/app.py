@@ -4,6 +4,7 @@ import joblib
 import pandas as pd
 import numpy as np
 import traceback
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -12,24 +13,25 @@ CORS(app)
 model = joblib.load("diabetes_model.joblib")
 scaler = joblib.load("scaler.joblib")
 
-# Load original dataset to get correct columns
+# Load original dataset
 df_train = pd.read_csv("diabetes_prediction_dataset.csv")
 if "diabetes" in df_train.columns:
     df_train = df_train.drop(columns=["diabetes"])
 
-# Encode training data to know all columns model expects
+# One-hot encode full training data to capture all columns
 df_train_encoded = pd.get_dummies(df_train, drop_first=False)
 feature_columns = df_train_encoded.columns.tolist()
 
-# Identify numeric columns that were scaled
+# Columns that were scaled
 numeric_cols = ['age', 'hypertension', 'heart_disease', 'bmi', 'HbA1c_level', 'blood_glucose_level']
+
 
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
         data = request.get_json()
 
-        # Normalize key names
+        # Normalize keys
         data_fixed = {
             "age": float(data.get("age")),
             "hypertension": int(data.get("hypertension")),
@@ -41,21 +43,20 @@ def predict():
             "smoking_history": data.get("smoking_history") or data.get("smoking")
         }
 
-        # Convert input to DataFrame
         df_input = pd.DataFrame([data_fixed])
 
-        # One-hot encode categorical features
+        # One-hot encode
         df_encoded = pd.get_dummies(df_input, drop_first=False)
         df_encoded = df_encoded.reindex(columns=feature_columns, fill_value=0)
 
-        # Split numeric and categorical parts
+        # Split numeric + categorical
         df_numeric = df_encoded[numeric_cols]
         df_categorical = df_encoded.drop(columns=numeric_cols)
 
-        # Scale only numeric part
+        # Scale numerical data
         X_scaled_numeric = scaler.transform(df_numeric)
 
-        # Combine back (keep order same as training)
+        # Combine features
         X_final = np.concatenate([X_scaled_numeric, df_categorical.values], axis=1)
 
         # Predict
@@ -69,5 +70,7 @@ def predict():
         return jsonify({"error": str(e)}), 500
 
 
+# ✅ Render free instance uses PORT >= 10000
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 10000))  # Render default port
+    app.run(host="0.0.0.0", port=port)

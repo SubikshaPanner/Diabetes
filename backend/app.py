@@ -7,7 +7,9 @@ import traceback
 import os
 
 app = Flask(__name__)
-CORS(app)
+
+# ✅ Allow specific origins and handle preflight OPTIONS requests
+CORS(app, resources={r"/*": {"origins": ["https://diabetes0515.vercel.app", "http://localhost:3000"]}}, supports_credentials=True)
 
 # Load model and scaler
 model = joblib.load("diabetes_model.joblib")
@@ -26,8 +28,16 @@ feature_columns = df_train_encoded.columns.tolist()
 numeric_cols = ['age', 'hypertension', 'heart_disease', 'bmi', 'HbA1c_level', 'blood_glucose_level']
 
 
-@app.route("/predict", methods=["POST"])
+@app.route("/predict", methods=["POST", "OPTIONS"])
 def predict():
+    # ✅ Handle preflight OPTIONS requests explicitly
+    if request.method == "OPTIONS":
+        response = jsonify({"message": "CORS preflight OK"})
+        response.headers.add("Access-Control-Allow-Origin", "https://diabetes0515.vercel.app")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type")
+        response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
+        return response, 200
+
     try:
         data = request.get_json()
 
@@ -45,7 +55,7 @@ def predict():
 
         df_input = pd.DataFrame([data_fixed])
 
-        # One-hot encode
+        # One-hot encode input
         df_encoded = pd.get_dummies(df_input, drop_first=False)
         df_encoded = df_encoded.reindex(columns=feature_columns, fill_value=0)
 
@@ -63,11 +73,15 @@ def predict():
         prediction = model.predict(X_final)[0]
         result = "Diabetic" if prediction == 1 else "Non-Diabetic"
 
-        return jsonify({"prediction": result})
+        response = jsonify({"prediction": result})
+        response.headers.add("Access-Control-Allow-Origin", "https://diabetes0515.vercel.app")
+        return response
 
     except Exception as e:
         traceback.print_exc()
-        return jsonify({"error": str(e)}), 500
+        response = jsonify({"error": str(e)})
+        response.headers.add("Access-Control-Allow-Origin", "https://diabetes0515.vercel.app")
+        return response, 500
 
 
 # ✅ Render free instance uses PORT >= 10000
